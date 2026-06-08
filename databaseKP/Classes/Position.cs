@@ -55,7 +55,7 @@ ORDER BY p.PositionID", conn);
             }
         }
 
-        public void Update(int id, string name, string category, decimal salary, int departmentId)
+        public void UpdateField(int id, string name, string category, decimal salary, int departmentId)
         {
             SqlConnection conn = new SqlConnection(_connStr);
             try

@@ -51,7 +51,7 @@ namespace databaseKP.Classes
             }
         }
 
-        public void Update(int id, string name, string type)
+        public void UpdateField(int id, string name, string type)
         {
             SqlConnection conn = new SqlConnection(_connStr);
             try

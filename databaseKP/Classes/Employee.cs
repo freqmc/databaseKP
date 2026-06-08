@@ -66,7 +66,7 @@ VALUES (@pn, @ln, @fn, @mn, @ps, @pnum, @ed, @pid)", conn);
             }
         }
 
-        public void Update(int id, string personnelNumber, string lastName, string firstName, string middleName,
+        public void UpdateField(int id, string personnelNumber, string lastName, string firstName, string middleName,
             string passportSeries, string passportNumber, string education, int positionId)
         {
             SqlConnection conn = new SqlConnection(_connStr);

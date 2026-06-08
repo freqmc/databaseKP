@@ -1,5 +1,4 @@
-﻿using databaseKP;
-using databaseKP.AddForms;
+﻿using databaseKP.AddForms;
 using databaseKP.Utils;
 using databaseKP.Classes;
 using System;
@@ -19,7 +18,7 @@ namespace databaseKP
 
         private string _currentEditColumn = "";
         private int _currentEditRowId = 0;
-        private string _currentIdColumnName = "";
+        private string _currentTableName = "";
 
         public MainForm()
         {
@@ -33,35 +32,34 @@ namespace databaseKP
         {
             bool canEdit = SessionManager.CanEdit;
 
-            // Сотрудники
             btnEmpAdd.Enabled = canEdit;
             btnEmpEdit.Enabled = canEdit;
             btnEmpDelete.Enabled = canEdit;
             btnEmpExpExcel.Enabled = canEdit;
             btnEmpExpWord.Enabled = canEdit;
-            // Отделы
+
             btnDeptAdd.Enabled = canEdit;
             btnDeptEdit.Enabled = canEdit;
             btnDeptDelete.Enabled = canEdit;
             btnDeptExpExcel.Enabled = canEdit;
             btnDeptExpWord.Enabled = canEdit;
-            // Должности
+
             btnPosAdd.Enabled = canEdit;
             btnPosEdit.Enabled = canEdit;
             btnPosDelete.Enabled = canEdit;
             btnPosExpExcel.Enabled = canEdit;
             btnPosExpWord.Enabled = canEdit;
-            // Табель
+
             btnTimeAdd.Enabled = canEdit;
             btnTimeDelete.Enabled = canEdit;
             btnTimeExpExcel.Enabled = canEdit;
             btnTimeExpWord.Enabled = canEdit;
-            // События
+
             btnEventAdd.Enabled = canEdit;
             btnEventDelete.Enabled = canEdit;
             btnEventExpExcel.Enabled = canEdit;
             btnEventExpWord.Enabled = canEdit;
-            // Приказы
+
             btnOrdAdd.Enabled = canEdit;
             btnOrdEdit.Enabled = canEdit;
             btnOrdDelete.Enabled = canEdit;
@@ -74,6 +72,7 @@ namespace databaseKP
             grid.ReadOnly = true;
             grid.AllowUserToAddRows = false;
             grid.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            grid.CellClick -= DataGridView_CellClick;
             grid.CellClick += DataGridView_CellClick;
         }
 
@@ -84,32 +83,27 @@ namespace databaseKP
             DataGridView grid = (DataGridView)sender;
             object value = grid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
 
-            // Получаем ID текущей строки
-            string idColumnName = GetIdColumnName(grid.Name);
-            if (idColumnName != "" && grid.Rows[e.RowIndex].Cells[idColumnName].Value != null)
+            if (grid.Rows[e.RowIndex].Cells[0].Value != null)
             {
-                _currentEditRowId = Convert.ToInt32(grid.Rows[e.RowIndex].Cells[idColumnName].Value);
-                _currentIdColumnName = idColumnName;
+                _currentEditRowId = Convert.ToInt32(grid.Rows[e.RowIndex].Cells[0].Value);
             }
 
-            _currentEditColumn = grid.Columns[e.ColumnIndex].DataPropertyName;
-            if (string.IsNullOrEmpty(_currentEditColumn))
-                _currentEditColumn = grid.Columns[e.ColumnIndex].Name;
+            _currentEditColumn = grid.Columns[e.ColumnIndex].Name;
+            _currentTableName = GetTableName(grid.Name);
 
-            txtEditValue.Text = value?.ToString() ?? "";
-            lblEditInfo.Text = $"Ячейка: {grid.Columns[e.ColumnIndex].HeaderText} (ID: {_currentEditRowId})";
+            lblEditInfo.Text = $"Ячейка: {grid.Columns[e.ColumnIndex].HeaderText} (ID: {_currentEditRowId}, Столбец: {_currentEditColumn})";
         }
 
-        private string GetIdColumnName(string gridName)
+        private string GetTableName(string gridName)
         {
             switch (gridName)
             {
-                case "dgvEmployees": return "EmployeeID";
-                case "dgvDepartments": return "DepartmentID";
-                case "dgvPositions": return "PositionID";
-                case "dgvTimesheet": return "TimesheetID";
-                case "dgvEvents": return "EventID";
-                case "dgvOrders": return "OrderID";
+                case "dgvEmployees": return "Employees";
+                case "dgvDepartments": return "Departments";
+                case "dgvPositions": return "Positions";
+                case "dgvTimesheet": return "TimesheetRecords";
+                case "dgvEvents": return "StaffEvents";
+                case "dgvOrders": return "Orders";
                 default: return "";
             }
         }
@@ -135,12 +129,19 @@ namespace databaseKP
 
         private void btnEmpEdit_Click(object sender, EventArgs e)
         {
-            if (_currentEditRowId == 0 || string.IsNullOrEmpty(_currentEditColumn))
+            if (_currentEditRowId == 0)
             {
-                MessageBox.Show("Сначала выберите ячейку для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Сначала выберите запись для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show($"Редактирование: {_currentEditColumn} = {txtEditValue.Text}\nID: {_currentEditRowId}\n(Требуется реализация конкретного UPDATE)", "Инфо");
+
+            using (EditEmployeeForm editForm = new EditEmployeeForm(_currentEditRowId))
+            {
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadEmployeesData();
+                }
+            }
         }
 
         private void btnEmpAdd_Click(object sender, EventArgs e)
@@ -178,10 +179,17 @@ namespace databaseKP
         {
             if (_currentEditRowId == 0)
             {
-                MessageBox.Show("Сначала выберите ячейку для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Сначала выберите запись для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show($"Редактирование: {_currentEditColumn} = {txtEditValue.Text}\nID: {_currentEditRowId}", "Инфо");
+
+            using (EditDepartmentForm editForm = new EditDepartmentForm(_currentEditRowId))
+            {
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadDepartmentsData();
+                }
+            }
         }
 
         private void btnDeptAdd_Click(object sender, EventArgs e)
@@ -219,10 +227,17 @@ namespace databaseKP
         {
             if (_currentEditRowId == 0)
             {
-                MessageBox.Show("Сначала выберите ячейку для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Сначала выберите запись для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show($"Редактирование: {_currentEditColumn} = {txtEditValue.Text}\nID: {_currentEditRowId}", "Инфо");
+
+            using (EditPositionForm editForm = new EditPositionForm(_currentEditRowId))
+            {
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadPositionsData();
+                }
+            }
         }
 
         private void btnPosAdd_Click(object sender, EventArgs e)
@@ -237,7 +252,7 @@ namespace databaseKP
         }
         #endregion
 
-        #region 4. Табель (с фильтром по дате)
+        #region 4. Табель
         private void LoadTimesheetData()
         {
             _timeRepo.DisplayData(dgvTimesheet);
@@ -271,7 +286,7 @@ namespace databaseKP
         }
         #endregion
 
-        #region 5. Кадровые события (с фильтром по дате)
+        #region 5. Кадровые события
         private void LoadEventsData()
         {
             _eventRepo.DisplayData(dgvEvents);
@@ -305,7 +320,7 @@ namespace databaseKP
         }
         #endregion
 
-        #region 6. Приказы (с фильтром по дате)
+        #region 6. Приказы
         private void LoadOrdersData()
         {
             _orderRepo.DisplayData(dgvOrders);
@@ -331,10 +346,17 @@ namespace databaseKP
         {
             if (_currentEditRowId == 0)
             {
-                MessageBox.Show("Сначала выберите ячейку для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Сначала выберите запись для редактирования.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show($"Редактирование: {_currentEditColumn} = {txtEditValue.Text}\nID: {_currentEditRowId}", "Инфо");
+
+            using (EditOrderForm editForm = new EditOrderForm(_currentEditRowId))
+            {
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadOrdersData();
+                }
+            }
         }
 
         private void btnOrdAdd_Click(object sender, EventArgs e)
@@ -391,7 +413,6 @@ namespace databaseKP
                 try
                 {
                     deleteAction(id);
-                    // Перезагружаем данные активной вкладки
                     if (tabControl1.SelectedTab == tabEmployees) LoadEmployeesData();
                     else if (tabControl1.SelectedTab == tabDepartments) LoadDepartmentsData();
                     else if (tabControl1.SelectedTab == tabPositions) LoadPositionsData();
@@ -420,7 +441,7 @@ namespace databaseKP
         }
         #endregion
 
-        #region Экспорт (для всех таблиц)
+        #region Экспорт
         private void ExportExcel(DataGridView grid, string defaultName)
         {
             using (SaveFileDialog sfd = new SaveFileDialog { Filter = "Excel Files|*.xls", FileName = defaultName })
