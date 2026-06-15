@@ -82,8 +82,17 @@
             this.btnOrdDelete = new System.Windows.Forms.Button();
             this.btnOrdExpExcel = new System.Windows.Forms.Button();
             this.btnOrdExpWord = new System.Windows.Forms.Button();
+            this.tabStatistics = new System.Windows.Forms.TabPage();
+            this.btnStatsExpWord = new System.Windows.Forms.Button();
+            this.btnStatsExpExcel = new System.Windows.Forms.Button();
+            this.dgvStatistics = new System.Windows.Forms.DataGridView();
+            this.lblStatType = new System.Windows.Forms.Label();
+            this.cmbStatType = new System.Windows.Forms.ComboBox();
+            this.btnRefreshStats = new System.Windows.Forms.Button();
             this.pnlEditDelete = new System.Windows.Forms.Panel();
             this.lblEditInfo = new System.Windows.Forms.Label();
+            this.lblEditValue = new System.Windows.Forms.Label();
+            this.txtEditValue = new System.Windows.Forms.TextBox();
             this.lblDeleteId = new System.Windows.Forms.Label();
             this.numDeleteId = new System.Windows.Forms.NumericUpDown();
             this.tabControl1.SuspendLayout();
@@ -99,6 +108,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvEvents)).BeginInit();
             this.tabOrders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).BeginInit();
+            this.tabStatistics.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvStatistics)).BeginInit();
             this.pnlEditDelete.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDeleteId)).BeginInit();
             this.SuspendLayout();
@@ -111,6 +122,7 @@
             this.tabControl1.Controls.Add(this.tabTimesheet);
             this.tabControl1.Controls.Add(this.tabEvents);
             this.tabControl1.Controls.Add(this.tabOrders);
+            this.tabControl1.Controls.Add(this.tabStatistics);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 50);
             this.tabControl1.Name = "tabControl1";
@@ -793,10 +805,95 @@
             this.btnOrdExpWord.UseVisualStyleBackColor = true;
             this.btnOrdExpWord.Click += new System.EventHandler(this.btnOrdExpWord_Click);
             // 
+            // tabStatistics
+            // 
+            this.tabStatistics.Controls.Add(this.btnStatsExpWord);
+            this.tabStatistics.Controls.Add(this.btnStatsExpExcel);
+            this.tabStatistics.Controls.Add(this.dgvStatistics);
+            this.tabStatistics.Controls.Add(this.lblStatType);
+            this.tabStatistics.Controls.Add(this.cmbStatType);
+            this.tabStatistics.Controls.Add(this.btnRefreshStats);
+            this.tabStatistics.Location = new System.Drawing.Point(4, 22);
+            this.tabStatistics.Name = "tabStatistics";
+            this.tabStatistics.Padding = new System.Windows.Forms.Padding(3);
+            this.tabStatistics.Size = new System.Drawing.Size(992, 574);
+            this.tabStatistics.TabIndex = 6;
+            this.tabStatistics.Text = "Статистика";
+            this.tabStatistics.UseVisualStyleBackColor = true;
+            // 
+            // btnStatsExpWord
+            // 
+            this.btnStatsExpWord.Location = new System.Drawing.Point(651, 9);
+            this.btnStatsExpWord.Name = "btnStatsExpWord";
+            this.btnStatsExpWord.Size = new System.Drawing.Size(90, 23);
+            this.btnStatsExpWord.TabIndex = 4;
+            this.btnStatsExpWord.Text = "Экспорт Word";
+            this.btnStatsExpWord.UseVisualStyleBackColor = true;
+            this.btnStatsExpWord.Click += new System.EventHandler(this.btnStatsExpWord_Click);
+            // 
+            // btnStatsExpExcel
+            // 
+            this.btnStatsExpExcel.Location = new System.Drawing.Point(529, 9);
+            this.btnStatsExpExcel.Name = "btnStatsExpExcel";
+            this.btnStatsExpExcel.Size = new System.Drawing.Size(93, 23);
+            this.btnStatsExpExcel.TabIndex = 3;
+            this.btnStatsExpExcel.Text = "Экспорт Excel";
+            this.btnStatsExpExcel.UseVisualStyleBackColor = true;
+            this.btnStatsExpExcel.Click += new System.EventHandler(this.btnStatsExpExcel_Click);
+            // 
+            // dgvStatistics
+            // 
+            this.dgvStatistics.AllowUserToAddRows = false;
+            this.dgvStatistics.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvStatistics.Location = new System.Drawing.Point(6, 70);
+            this.dgvStatistics.Name = "dgvStatistics";
+            this.dgvStatistics.ReadOnly = true;
+            this.dgvStatistics.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.dgvStatistics.Size = new System.Drawing.Size(980, 498);
+            this.dgvStatistics.TabIndex = 0;
+            // 
+            // lblStatType
+            // 
+            this.lblStatType.AutoSize = true;
+            this.lblStatType.Location = new System.Drawing.Point(6, 12);
+            this.lblStatType.Name = "lblStatType";
+            this.lblStatType.Size = new System.Drawing.Size(89, 13);
+            this.lblStatType.TabIndex = 1;
+            this.lblStatType.Text = "Тип статистики:";
+            // 
+            // cmbStatType
+            // 
+            this.cmbStatType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbStatType.FormattingEnabled = true;
+            this.cmbStatType.Items.AddRange(new object[] {
+            "Количество сотрудников по отделам",
+            "Средняя зарплата по категориям",
+            "Количество кадровых событий по типу",
+            "Суммарные часы по сотрудникам",
+            "Количество приказов по типам",
+            "Категории должностей с зарплатой больше 30000 (HAVING)",
+            "Частые кадровые события (HAVING)"});
+            this.cmbStatType.Location = new System.Drawing.Point(110, 9);
+            this.cmbStatType.Name = "cmbStatType";
+            this.cmbStatType.Size = new System.Drawing.Size(250, 21);
+            this.cmbStatType.TabIndex = 1;
+            // 
+            // btnRefreshStats
+            // 
+            this.btnRefreshStats.Location = new System.Drawing.Point(370, 7);
+            this.btnRefreshStats.Name = "btnRefreshStats";
+            this.btnRefreshStats.Size = new System.Drawing.Size(100, 25);
+            this.btnRefreshStats.TabIndex = 2;
+            this.btnRefreshStats.Text = "Обновить";
+            this.btnRefreshStats.UseVisualStyleBackColor = true;
+            this.btnRefreshStats.Click += new System.EventHandler(this.btnRefreshStats_Click);
+            // 
             // pnlEditDelete
             // 
             this.pnlEditDelete.BackColor = System.Drawing.Color.LightGray;
             this.pnlEditDelete.Controls.Add(this.lblEditInfo);
+            this.pnlEditDelete.Controls.Add(this.lblEditValue);
+            this.pnlEditDelete.Controls.Add(this.txtEditValue);
             this.pnlEditDelete.Controls.Add(this.lblDeleteId);
             this.pnlEditDelete.Controls.Add(this.numDeleteId);
             this.pnlEditDelete.Dock = System.Windows.Forms.DockStyle.Top;
@@ -811,14 +908,30 @@
             this.lblEditInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Italic);
             this.lblEditInfo.Location = new System.Drawing.Point(10, 15);
             this.lblEditInfo.Name = "lblEditInfo";
-            this.lblEditInfo.Size = new System.Drawing.Size(47, 13);
+            this.lblEditInfo.Size = new System.Drawing.Size(201, 13);
             this.lblEditInfo.TabIndex = 0;
-            this.lblEditInfo.Text = "КАДРЫ";
+            this.lblEditInfo.Text = "Выберите ячейку для редактирования";
+            // 
+            // lblEditValue
+            // 
+            this.lblEditValue.AutoSize = true;
+            this.lblEditValue.Location = new System.Drawing.Point(300, 15);
+            this.lblEditValue.Name = "lblEditValue";
+            this.lblEditValue.Size = new System.Drawing.Size(92, 13);
+            this.lblEditValue.TabIndex = 1;
+            this.lblEditValue.Text = "Новое значение:";
+            // 
+            // txtEditValue
+            // 
+            this.txtEditValue.Location = new System.Drawing.Point(390, 12);
+            this.txtEditValue.Name = "txtEditValue";
+            this.txtEditValue.Size = new System.Drawing.Size(200, 20);
+            this.txtEditValue.TabIndex = 0;
             // 
             // lblDeleteId
             // 
             this.lblDeleteId.AutoSize = true;
-            this.lblDeleteId.Location = new System.Drawing.Point(406, 17);
+            this.lblDeleteId.Location = new System.Drawing.Point(610, 15);
             this.lblDeleteId.Name = "lblDeleteId";
             this.lblDeleteId.Size = new System.Drawing.Size(92, 13);
             this.lblDeleteId.TabIndex = 2;
@@ -826,7 +939,7 @@
             // 
             // numDeleteId
             // 
-            this.numDeleteId.Location = new System.Drawing.Point(504, 15);
+            this.numDeleteId.Location = new System.Drawing.Point(710, 12);
             this.numDeleteId.Maximum = new decimal(new int[] {
             1000000,
             0,
@@ -866,6 +979,9 @@
             this.tabOrders.ResumeLayout(false);
             this.tabOrders.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).EndInit();
+            this.tabStatistics.ResumeLayout(false);
+            this.tabStatistics.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvStatistics)).EndInit();
             this.pnlEditDelete.ResumeLayout(false);
             this.pnlEditDelete.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDeleteId)).EndInit();
@@ -882,8 +998,10 @@
         private System.Windows.Forms.TabPage tabTimesheet;
         private System.Windows.Forms.TabPage tabEvents;
         private System.Windows.Forms.TabPage tabOrders;
+        private System.Windows.Forms.TabPage tabStatistics;
         private System.Windows.Forms.Panel pnlEditDelete;
 
+        // Сотрудники
         private System.Windows.Forms.DataGridView dgvEmployees;
         private System.Windows.Forms.TextBox txtEmpFilter;
         private System.Windows.Forms.Label lblEmpFilter;
@@ -893,6 +1011,7 @@
         private System.Windows.Forms.Button btnEmpExpExcel;
         private System.Windows.Forms.Button btnEmpExpWord;
 
+        // Отделы
         private System.Windows.Forms.DataGridView dgvDepartments;
         private System.Windows.Forms.TextBox txtDeptFilter;
         private System.Windows.Forms.Label lblDeptFilter;
@@ -902,6 +1021,7 @@
         private System.Windows.Forms.Button btnDeptExpExcel;
         private System.Windows.Forms.Button btnDeptExpWord;
 
+        // Должности
         private System.Windows.Forms.DataGridView dgvPositions;
         private System.Windows.Forms.TextBox txtPosFilter;
         private System.Windows.Forms.Label lblPosFilter;
@@ -911,6 +1031,7 @@
         private System.Windows.Forms.Button btnPosExpExcel;
         private System.Windows.Forms.Button btnPosExpWord;
 
+        // Табель
         private System.Windows.Forms.DataGridView dgvTimesheet;
         private System.Windows.Forms.TextBox txtTimeFilter;
         private System.Windows.Forms.Label lblTimeFilter;
@@ -923,6 +1044,7 @@
         private System.Windows.Forms.Button btnTimeExpExcel;
         private System.Windows.Forms.Button btnTimeExpWord;
 
+        // События
         private System.Windows.Forms.DataGridView dgvEvents;
         private System.Windows.Forms.TextBox txtEventFilter;
         private System.Windows.Forms.Label lblEventFilter;
@@ -935,6 +1057,7 @@
         private System.Windows.Forms.Button btnEventExpExcel;
         private System.Windows.Forms.Button btnEventExpWord;
 
+        // Приказы
         private System.Windows.Forms.DataGridView dgvOrders;
         private System.Windows.Forms.TextBox txtOrdFilter;
         private System.Windows.Forms.Label lblOrdFilter;
@@ -947,8 +1070,20 @@
         private System.Windows.Forms.Button btnOrdDelete;
         private System.Windows.Forms.Button btnOrdExpExcel;
         private System.Windows.Forms.Button btnOrdExpWord;
+
+        // Статистика
+        private System.Windows.Forms.DataGridView dgvStatistics;
+        private System.Windows.Forms.ComboBox cmbStatType;
+        private System.Windows.Forms.Label lblStatType;
+        private System.Windows.Forms.Button btnRefreshStats;
+
+        // Панель редактирования
+        private System.Windows.Forms.TextBox txtEditValue;
         private System.Windows.Forms.Label lblEditInfo;
         private System.Windows.Forms.NumericUpDown numDeleteId;
         private System.Windows.Forms.Label lblDeleteId;
+        private System.Windows.Forms.Label lblEditValue;
+        private System.Windows.Forms.Button btnStatsExpWord;
+        private System.Windows.Forms.Button btnStatsExpExcel;
     }
 }

@@ -1,8 +1,10 @@
 ﻿using databaseKP.AddForms;
-using databaseKP.Utils;
 using databaseKP.Classes;
+using databaseKP.Utils;
 using System;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace databaseKP
@@ -371,6 +373,173 @@ namespace databaseKP
         }
         #endregion
 
+        #region Статистика
+        private void btnRefreshStats_Click(object sender, EventArgs e)
+        {
+            LoadStatistics();
+        }
+
+        private void LoadStatistics()
+        {
+            if (cmbStatType.SelectedIndex == -1) return;
+
+            string selectedStat = cmbStatType.SelectedItem.ToString();
+
+            switch (selectedStat)
+            {
+                case "Количество сотрудников по отделам":
+                    LoadDepartmentStats();
+                    break;
+                case "Средняя зарплата по категориям":
+                    LoadSalaryStats();
+                    break;
+                case "Количество кадровых событий по типу":
+                    LoadEventStats();
+                    break;
+                case "Суммарные часы по сотрудникам":
+                    LoadTimesheetStats();
+                    break;
+                case "Количество приказов по типам":
+                    LoadOrderStats();
+                    break;
+                case "Категории должностей с зарплатой больше 30000 (HAVING)":
+                    LoadSalaryStatsWithHaving();
+                    break;
+                case "Частые кадровые события (HAVING)":
+                    LoadEventStatsWithHaving();
+                    break;
+            }
+        }
+
+        private void LoadDepartmentStats()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(@"
+            SELECT d.DepartmentName AS Отдел, 
+                   COUNT(e.EmployeeID) AS Количество_сотрудников
+            FROM Departments d
+            LEFT JOIN Positions p ON d.DepartmentID = p.DepartmentID
+            LEFT JOIN Employees e ON p.PositionID = e.PositionID
+            GROUP BY d.DepartmentName
+            ORDER BY Количество_сотрудников DESC", conn);
+
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadSalaryStats()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(@"
+            SELECT Category AS Категория, 
+                   AVG(Salary) AS Средняя_зарплата,
+                   MIN(Salary) AS Минимальная,
+                   MAX(Salary) AS Максимальная,
+                   COUNT(*) AS Количество_должностей
+            FROM Positions
+            GROUP BY Category
+            ORDER BY Средняя_зарплата DESC", conn);
+
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadEventStats()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(@"
+            SELECT EventType AS Тип_события, 
+                   COUNT(*) AS Количество
+            FROM StaffEvents
+            GROUP BY EventType
+            ORDER BY Количество DESC", conn);
+
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadTimesheetStats()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(@"
+            SELECT e.LastName + ' ' + e.FirstName AS Сотрудник,
+                   SUM(t.Hours) AS Всего_часов,
+                   COUNT(t.TimesheetID) AS Рабочих_дней,
+                   AVG(t.Hours) AS Среднее_кол_во_часов
+            FROM Employees e
+            LEFT JOIN TimesheetRecords t ON e.EmployeeID = t.EmployeeID
+            GROUP BY e.EmployeeID, e.LastName, e.FirstName
+            ORDER BY Всего_часов DESC", conn);
+
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadOrderStats()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(@"
+            SELECT OrderType AS Тип_приказа, 
+                   COUNT(*) AS Количество
+            FROM Orders
+            GROUP BY OrderType
+            ORDER BY Количество DESC", conn);
+
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadSalaryStatsWithHaving() {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString)) {
+                SqlDataAdapter adapter = new SqlDataAdapter(
+                    @"SELECT Category AS Категория,
+                             AVG(Salary) AS Средняя_зарплата,
+                             COUNT(*) AS Количество_должностей
+                      FROM Positions
+                      GROUP BY Category
+                      HAVING AVG(Salary) > 30000
+                      ORDER BY Средняя_зарплата DESC", conn
+                    );
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+
+        private void LoadEventStatsWithHaving()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(
+                    @"SELECT EventType AS Тип_события,
+                             COUNT(*) AS Количество
+                      FROM StaffEvents
+                      GROUP BY EventType
+                      HAVING COUNT(*) >= 2
+                      ORDER BY Количество DESC", conn
+                    );
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dgvStatistics.DataSource = dt;
+            }
+        }
+        #endregion
+
         #region Общие методы
         private void ApplyFilter(DataGridView grid, string filterText, params string[] columns)
         {
@@ -438,6 +607,7 @@ namespace databaseKP
             else if (tabControl1.SelectedTab == tabTimesheet) LoadTimesheetData();
             else if (tabControl1.SelectedTab == tabEvents) LoadEventsData();
             else if (tabControl1.SelectedTab == tabOrders) LoadOrdersData();
+            else if (tabControl1.SelectedTab == tabStatistics) LoadStatistics();
         }
         #endregion
 
@@ -457,18 +627,20 @@ namespace databaseKP
             }
         }
 
-        private void btnEmpExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvEmployees, "Employees.xls");
-        private void btnEmpExpWord_Click(object sender, EventArgs e) => ExportWord(dgvEmployees, "Employees.doc");
-        private void btnDeptExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvDepartments, "Departments.xls");
-        private void btnDeptExpWord_Click(object sender, EventArgs e) => ExportWord(dgvDepartments, "Departments.doc");
-        private void btnPosExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvPositions, "Positions.xls");
-        private void btnPosExpWord_Click(object sender, EventArgs e) => ExportWord(dgvPositions, "Positions.doc");
-        private void btnTimeExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvTimesheet, "Timesheet.xls");
-        private void btnTimeExpWord_Click(object sender, EventArgs e) => ExportWord(dgvTimesheet, "Timesheet.doc");
-        private void btnEventExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvEvents, "Events.xls");
-        private void btnEventExpWord_Click(object sender, EventArgs e) => ExportWord(dgvEvents, "Events.doc");
-        private void btnOrdExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvOrders, "Orders.xls");
-        private void btnOrdExpWord_Click(object sender, EventArgs e) => ExportWord(dgvOrders, "Orders.doc");
+        private void btnEmpExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvEmployees, "Employees.xlsx");
+        private void btnEmpExpWord_Click(object sender, EventArgs e) => ExportWord(dgvEmployees, "Employees.docx");
+        private void btnDeptExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvDepartments, "Departments.xlsx");
+        private void btnDeptExpWord_Click(object sender, EventArgs e) => ExportWord(dgvDepartments, "Departments.docx");
+        private void btnPosExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvPositions, "Positions.xlsx");
+        private void btnPosExpWord_Click(object sender, EventArgs e) => ExportWord(dgvPositions, "Positions.docx");
+        private void btnTimeExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvTimesheet, "Timesheet.xlsx");
+        private void btnTimeExpWord_Click(object sender, EventArgs e) => ExportWord(dgvTimesheet, "Timesheet.doxc");
+        private void btnEventExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvEvents, "Events.xlsx");
+        private void btnEventExpWord_Click(object sender, EventArgs e) => ExportWord(dgvEvents, "Events.docx");
+        private void btnOrdExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvOrders, "Orders.xlsx");
+        private void btnOrdExpWord_Click(object sender, EventArgs e) => ExportWord(dgvOrders, "Orders.docx");
+        private void btnStatsExpExcel_Click(object sender, EventArgs e) => ExportExcel(dgvStatistics, "Statistic.xlsx");
+        private void btnStatsExpWord_Click(object sender, EventArgs e) => ExportWord(dgvStatistics, "Statistic.docx");
         #endregion
     }
 }
